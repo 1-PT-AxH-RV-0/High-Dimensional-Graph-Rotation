@@ -118,11 +118,11 @@ width = 1920
 height = 1080
 
 [drawing]
-scale = 300
+scale = 200
 line_width = 1
 line_color = [230, 230, 230]
 background_color = [20, 20, 20]
-focal_length = 5
+focal_length = 7
 
 [initial]
 move_offset = [1, 1, 1, 1]
@@ -143,7 +143,7 @@ type = "move_and_rotate"
 move_offset = [-1, -1, -1, -1]
 move_duration = 100
 rotations = [
-    { plane = [0, 2], angle = -45, duration = 100 }
+    { plane = [0, 2], angle = -45, duration = 100 },
     { plane = [2, 3], angle = 360, duration = 200 }
 ]
 rotate_center = [1, 1, 1, 1]
@@ -158,7 +158,7 @@ type = "move_and_rotate"
 move_offset = [-1, -1, 0, 0]
 move_duration = 100
 rotations = [
-    { plane = [0, 2], angle = -45, duration = 100 }
+    { plane = [0, 2], angle = -45, duration = 100 },
     { plane = [2, 3], angle = 360, duration = 200 }
 ]
 rotate_center = [0.5, 0.5, 0.0, 0.0]
