@@ -1,0 +1,40 @@
+[vertices]
+type = "Hypercube"
+dimensions = 4
+
+[video]
+output_path = "rotation.mp4"
+fps = 30
+width = 1920
+height = 1080
+
+[drawing]
+scale = 300
+line_width = 1
+line_color = [230, 230, 230]
+background_color = [20, 20, 20]
+focal_length = 5
+
+[initial]
+move_offset = [1, 1, 1, 1]
+rotations = [
+    { plane = [0, 2], angle = 45 }
+]
+center = [1, 1, 1, 1]
+
+[[actions]]
+type = "rotate"
+rotations = [
+    { plane = [0, 2], angle = 360, duration = 100 }
+]
+center = [1, 1, 1, 1]
+
+[[actions]]
+type = "move_and_rotate"
+move_offset = [-1, -1, -1, -1]
+move_duration = 100
+rotations = [
+    { plane = [0, 2], angle = -45, duration = 100 }
+    { plane = [2, 3], angle = 360, duration = 200 }
+]
+rotate_center = [1, 1, 1, 1]
