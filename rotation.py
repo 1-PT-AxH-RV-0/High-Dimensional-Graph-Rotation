@@ -4,24 +4,26 @@ import math
 import itertools
 from tqdm import tqdm
 import os
-import toml
-
 
 from parseOFF import parse_off_file
 
 CUR_FOLDER = os.path.dirname(__file__)
 
-def sinspace(start, stop, num=50, endpoint=True):
+def sinspace_piece(start, stop, index, num=50, endpoint=True):
     if endpoint:
-        angles = np.linspace(0, np.pi, num)
+        angle = np.pi / num * index
+        prev_angle = np.pi / num * (index - 1)
     else:
-        angles = np.linspace(0, np.pi, num + 1)[:-1]
+        angle = np.pi / (num + 1) * index
+        prev_angle = np.pi / (num + 1) * (index - 1)
     
-    sin_values = (np.sin(angles - np.pi / 2) + 1) / 2
+    sin_values = (np.sin(angle - np.pi / 2) + 1) / 2
+    prev_sin_values = (np.sin(prev_angle - np.pi / 2) + 1) / 2
     
     scaled_values = start + (stop - start) * sin_values
+    prev_scaled_values = start + (stop - start) * prev_sin_values
     
-    return scaled_values
+    return scaled_values - prev_scaled_values
 
 
 def pad_arrays(arrays):
@@ -93,7 +95,7 @@ def rotate_point(point, rotation_matrix):
     return rotated_part + remain_part
 
 
-def get_rot_angs(dim, direction, ang, duration):
+def get_rot_ang(dim, direction, ang):
     if dim < 2:
         raise ValueError("维度必须大于二。")
     
@@ -113,19 +115,14 @@ def get_rot_angs(dim, direction, ang, duration):
         raise ValueError(f"旋转平面 {direction} 在 {dim} 维空间中找不到。")
     
     ang_rad = math.radians(ang)
-    angles = sinspace(0, ang_rad, duration + 1)[1:]
     
-    res = []
-    for angle in angles:
-        rot_angles = [0.0] * (dim * (dim - 1) // 2)
-        rot_angles[plane_idx] = angle
-        
-        res.append(rot_angles)
+    rot_angles = [0.0] * (dim * (dim - 1) // 2)
+    rot_angles[plane_idx] = ang_rad
     
-    return res
+    return rot_angles
 
 
-def rotate(rotation_configs, vectors, center=None):
+def rotate(angles, vectors, center=None):
     dims_set = set()
     for v in vectors:
         dims_set.add(len(v))
@@ -135,25 +132,13 @@ def rotate(rotation_configs, vectors, center=None):
     if center is not None and len(center) != dim:
         raise ValueError(f"旋转中心的维度必须与向量的维度相同。")
     
-    rot_angs = []
-    for direction, ang, duration in rotation_configs:
-        rot_angs.append(get_rot_angs(dim, direction, ang, duration))
-    rot_angs = np.sum(pad_arrays(rot_angs), axis=0)
-    
-    res = []
-    for ang in rot_angs:
-        res.append([])
-        rotation_matrix = get_rotation_matrix(ang, center)
-        for vector in vectors:
-            if center is not None:
-                res[-1].append(rotate_point(np.concat((vector, np.array([1]))), rotation_matrix)[:-1])
-            else:
-                res[-1].append(rotate_point(vector, rotation_matrix))
+    rotation_matrix = get_rotation_matrix(angles, center)
+    res = [rotate_point(np.concat((vector, np.array([1]))), rotation_matrix)[:-1] if center is not None else rotate_point(vector, rotation_matrix) for vector in vectors]
 
     return res
 
 
-def move(offset, duration, vectors):
+def move(offset, vectors):
     dims_set = set()
     for v in vectors:
         dims_set.add(len(v))
@@ -163,60 +148,8 @@ def move(offset, duration, vectors):
 
     if len(offset) != dim:
         raise ValueError(f"偏移量的维度必须与向量的维度相同。")
-    
-    offsets = np.array([sinspace(0, o, duration + 1)[1:] for o in offset])
-    offsets = np.rot90(offsets)[::-1]
-    res = [list(map(lambda v: v + offsets_frame, vectors)) for offsets_frame in offsets]
-   
-    return res
-
-
-def move_and_rotate(move_config, rotation_configs, vectors, rotation_center=None):
-    offset, move_duration = move_config
-    move_vectors = move(offset, move_duration, vectors)
-    
-    if rotation_center is not None:
-        move_centers = move(offset, move_duration, [rotation_center])
-    else:
-        move_centers = [[None]] * move_duration
-    
-    dims_set = {len(v) for v in vectors}
-    if len(dims_set) != 1:
-        raise ValueError("每个向量的维度必须相同。")
-    dim = dims_set.pop()
-    if len(offset) != dim:
-        raise ValueError(f"偏移量的维度必须与向量的维度相同。")
-    if rotation_center is not None and len(rotation_center) != dim:
-        raise ValueError(f"旋转中心的维度必须与向量的维度相同。")
-    
-    rot_angs_list = []
-    for config in rotation_configs:
-        direction, ang, rot_duration = config
-        angs = get_rot_angs(dim, direction, ang, rot_duration)
-        rot_angs_list.append(angs)
-
-    padded_angs = pad_arrays(rot_angs_list)
-    summed_angs = np.sum(padded_angs, axis=0)
-    move_vectors, move_centers, summed_angs = pad_arrays([move_vectors, move_centers, summed_angs])
-    
-    result = []
-    for t in range(len(summed_angs)):
-        current_moved = move_vectors[t]
-        current_ang = summed_angs[t]
-        current_center = move_centers[t][0]
-        current_matrix = get_rotation_matrix(current_ang, current_center)
-        rotated_vectors = []
-        for vec in current_moved:
-            if current_center is not None:
-                homo_vec = np.concatenate((vec, [1]))
-                rotated_homo = rotate_point(homo_vec, current_matrix)
-                rotated = rotated_homo[:-1]
-            else:
-                rotated = rotate_point(vec, current_matrix)
-            rotated_vectors.append(rotated)
-        result.append(rotated_vectors)
-    
-    return result
+       
+    return [vector + np.array(offset) for vector in vectors]
 
 
 def project_nd_to_2d_perspective(point, focal_length):
@@ -700,57 +633,30 @@ class RegularStarPolychora:
         return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gax.off'))
 
 
-def process_action(action, frames):
-    current = frames[-1]
-    action_type = action['type']
+def get_duration(action):
+    duration = action.get('duration')
+    if duration is None:
+        duration = max(action['rotations'], key=lambda rotation: rotation['duration'])['duration']
     
-    if action_type == 'move':
-        new_frames = move(
-            tuple(action['offset']), 
-            action['duration'], 
-            current
-        )
-        frames.extend(new_frames)
-    
-    elif action_type == 'rotate':
-        rotations = []
-        for r in action['rotations']:
-            rotations.append((
-                tuple(r['plane']), 
-                r['angle'], 
-                r['duration']
-            ))
-        center = action.get('center')
-        new_frames = rotate(rotations, current, center)
-        frames.extend(new_frames)
-    
-    elif action_type == 'move_and_rotate':
-        move_offset = tuple(action['move_offset'])
-        move_duration = action['move_duration']
-        rotations = []
-        for r in action['rotations']:
-            rotations.append((
-                tuple(r['plane']), 
-                r['angle'], 
-                r['duration']
-            ))
-        center = action.get('rotate_center')
+    return duration
+
+
+def get_current_actions(actions, frame):
+    return [(action, frame - action['start']) for action in actions if action['start'] < frame <= action['start'] + get_duration(action)]
         
-        new_frames = move_and_rotate((move_offset, move_duration), rotations, current, center)
-        frames.extend(new_frames)
+
+def get_last_frame(actions):
+    def get_last_frame_with_action(action):
+        return action['start'] + get_duration(action)
     
-    else:
-        raise ValueError(f"未知动作类型: {action_type}")
+    return get_last_frame_with_action(max(actions, key=get_last_frame_with_action))
 
 
-def create_rotation_video(config_path="config.toml"):
-    CUR_FOLDER = os.path.dirname(__file__)
-    
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = toml.load(f)
-    
+def create_rotation_video(config):
     vertices_config = config['vertices']
     graph_type = vertices_config['type']
+    
+    print("正在生成顶点和边……")
     if graph_type in ['RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron', 'RegularStarPolychora']:
         vertices, edges = getattr(globals()[graph_type], vertices_config['name'])()
     elif graph_type == "RegularPolygon":
@@ -762,50 +668,97 @@ def create_rotation_video(config_path="config.toml"):
     else:
         raise ValueError('图形类型无效。')
     
+    dim = len(vertices[0])
+    
     video_config = config.get('video', {})
     output_path = video_config.get('output_path', os.path.join(CUR_FOLDER, 'rotation.mp4'))
     fps = video_config.get('fps', 30)
     width = video_config.get('width', 1920)
     height = video_config.get('height', 1080)
+    end_pause_frames = video_config.get('end_pause_frames', fps *  2)
     
     drawing_config = config.get('drawing', {})
     scale = drawing_config.get('scale', 300)
     focal_length = drawing_config.get('focal_length', 5)
-    line_width = drawing_config.get('line_width', 1)
+    line_width = drawing_config.get('line_width', 5)
     line_color = drawing_config.get('line_color', [0, 0, 0])
     background_color = drawing_config.get('background_color', [255, 255, 255])
         
+        
+    transformation_data = {
+        'offset': np.zeros((dim)),
+        'rotate': {}
+    }
     initial = config.get('initial', None)
+    
+    print("正在初始化帧……")
     if initial is not None:
-        move_offset = initial.get('move_offset')
+        offset = initial.get('offset', [0] * dim)
         
         rotations = []
         for r in initial.get('rotations', []):
-            rotations.append((
-                tuple(r['plane']), 
-                r['angle'],
-                1
-            ))
-        
-        center = initial.get('center')
-        if move_offset and rotations:
-            frames = move(move_offset, 1, vertices)
-            frames = rotate(rotations, frames[0], center)
-        elif move_offset:
-            frames = move(move_offset, 1, vertices)
-        elif rotations:
-            frames = rotate(rotations, vertices, center)
+            center = tuple(r.get('center', [0] * dim))
+            plane = r['plane']
+            angle = r['angle']
+                                
+            if center not in transformation_data['rotate']:
+                transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle))
+            else:
+                transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle))
+
+        if offset is not None:
+            transformation_data['offset'] = offset
+
+        frame = vertices
+        for center, angles in transformation_data['rotate'].items():
+            frame = rotate(angles, frame, center)
+        frame = move(transformation_data['offset'], frame)
+        frames = [frame]
     else:
         frames = [vertices]
     
     actions = config.get('actions', [])
-    for action in actions:
-        process_action(action, frames)
     
+    for frame in tqdm(range(1, get_last_frame(actions) + 1), desc="解析动作和生成帧"):
+        current_actions = get_current_actions(actions, frame)
+        for action, past in current_actions:
+            match action['type']:
+                case 'move':
+                    transformation_data['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
+                case 'rotate':
+                    center = tuple(action.get('center', [0] * dim))
+                    plane = action['plane']
+                    angle = action['angle']
+                                        
+                    if center not in transformation_data['rotate']:
+                        transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                    else:
+                        transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                case 'rotate_complex':
+                    total_duration = get_duration(action)
+                    for r in action['rotations']:
+                        center = tuple(r.get('center', [0] * dim))
+                        plane = r['plane']
+                        angle = r['angle']
+                        duration = r['duration']
+                        rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
+                                            
+                        if center not in transformation_data['rotate']:
+                            transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+                        else:
+                            transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+        
+        new_frame = vertices
+        for center, angles in transformation_data['rotate'].items():
+            new_frame = rotate(angles, new_frame, center)
+        new_frame = move(transformation_data['offset'], new_frame)
+        frames.append(new_frame)
+            
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
     
-    for vertices_frame in tqdm(frames):
+    last_img_arr = None
+    for vertices_frame in tqdm(frames, desc="绘制帧"):
         img_arr = np.full((height, width, 3), background_color, dtype=np.uint8)
         projected = [project_nd_to_2d_perspective(v, focal_length) for v in vertices_frame]
         scaled = [(int(x*scale + width//2), height - (int(y*scale + height//2))) for x, y in projected]
@@ -818,10 +771,19 @@ def create_rotation_video(config_path="config.toml"):
                 cv2.line(img_arr, *clipped, line_color, line_width)
         
         video_writer.write(img_arr)
+        last_img_arr = img_arr
+    
+    if end_pause_frames:
+        for _ in tqdm(range(end_pause_frames), desc="添加末尾停顿"):
+            video_writer.write(last_img_arr)
     
     video_writer.release()
 
 
 if __name__ == "__main__":
-    create_rotation_video(os.path.join(CUR_FOLDER, 'config.toml'))
+    import toml
+
+    with open(os.path.join(CUR_FOLDER, 'config.toml'), 'r', encoding='utf-8') as f:
+        config = toml.load(f)
+    create_rotation_video(config)
     

@@ -3,53 +3,48 @@ type = "Hypercube"
 dimensions = 4
 
 [video]
-output_path = "rotation.mp4"
 fps = 30
 width = 1920
 height = 1080
+end_pause_frames = 60
 
 [drawing]
-scale = 200
-line_width = 1
+scale = 120
+line_width = 5
 line_color = [230, 230, 230]
 background_color = [20, 20, 20]
 focal_length = 7
 
 [initial]
-move_offset = [1, 1, 1, 1]
 rotations = [
     { plane = [0, 2], angle = 45 }
 ]
-center = [1, 1, 1, 1]
-
-[[actions]]
-type = "rotate"
-rotations = [
-    { plane = [0, 2], angle = 360, duration = 100 }
-]
-center = [1, 1, 1, 1]
-
-[[actions]]
-type = "move_and_rotate"
-move_offset = [-1, -1, -1, -1]
-move_duration = 100
-rotations = [
-    { plane = [0, 2], angle = -45, duration = 100 },
-    { plane = [2, 3], angle = 360, duration = 200 }
-]
-rotate_center = [1, 1, 1, 1]
+offset = [1, 1, 1, 1]
 
 [[actions]]
 type = "move"
-offset = [0.5, 0.5, 0.0, 0.0]
-duration = 100
+offset = [-2.0, -1.0, -1.0, -3.0]
+duration = 150
+start = 0
 
 [[actions]]
-type = "move_and_rotate"
-move_offset = [-1, -1, 0, 0]
-move_duration = 100
+type = "rotate"
+plane = [0, 2]
+angle = 360
+center = [2, 0, 0, 0]
+duration = 100
+start = 150
+
+[[actions]]
+type = "rotate_complex"
 rotations = [
-    { plane = [0, 2], angle = -45, duration = 100 },
+    { plane = [0, 2], angle = -45, duration = 200 },
     { plane = [2, 3], angle = 360, duration = 200 }
 ]
-rotate_center = [0.5, 0.5, 0.0, 0.0]
+start = 250
+
+[[actions]]
+type = "move"
+offset = [1.0, 0.0, 0.0, 2.0]
+duration = 150
+start = 250
