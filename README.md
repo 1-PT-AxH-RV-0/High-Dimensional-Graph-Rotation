@@ -141,8 +141,8 @@ dimensions = 4
 id = "g1"
 
 [[graphs]]
-type = "Hypercube"
-dimensions = 4
+type = "RegularPolychoron"
+name = "tesseract"
 id = "g2"
 
 [video]
@@ -206,7 +206,7 @@ priority = -1
 target = "g2"
 
 [[actions]]
-type = "rotate_complex"
+type = "rotate_complexly"
 rotations = [
     { plane = [0, 2], angle = -45, duration = 200 },
     { plane = [2, 3], angle = 360, duration = 200 }
@@ -215,7 +215,7 @@ start = 250
 target = "g1"
 
 [[actions]]
-type = "rotate_complex"
+type = "rotate_complexly"
 rotations = [
     { plane = [0, 2], angle = -45, duration = 200 },
     { plane = [2, 3], angle = 270, duration = 200 },
