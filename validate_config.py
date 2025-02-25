@@ -1,3 +1,5 @@
+import os
+
 def validate_config(config):
     """验证配置文件基本结构正确性"""
     errors = []
@@ -53,7 +55,7 @@ def validate_config(config):
                 valid_types = {
                     'RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron',
                     'RegularStarPolychora', 'RegularPolygon', 'RegularStarPolygon',
-                    'Simplex', 'Hypercube', 'Orthoplex'
+                    'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
                 }
                 if graph_type and graph_type not in valid_types:
                     errors.append(f"graphs[{idx}].type 无效值 '{graph_type}'。")
@@ -78,6 +80,15 @@ def validate_config(config):
                 elif graph_type in {'Simplex', 'Hypercube', 'Orthoplex'}:
                     if 'dimensions' not in graph:
                         errors.append(f"graphs[{idx}] 需要字段 'dimensions'（当 type 为 {graph_type} 时）。")
+                elif graph_type == 'OffFile':
+                    if 'path' not in graph:
+                        errors.append(f"graphs[{idx}] 需要字段 'path'（当 type 为 OffFile 时）。")
+                        continue
+                    if not isinstance(graph['path'], str):
+                        errors.append(f"graphs[{idx}].path 类型错误，应为字符串。")
+                        continue
+                    if not os.path.isfile(graph['path']):
+                        errors.append(f"graphs[{idx}].path 所指向的路径不是一个文件。")
 
                 # 检查字段类型
                 type_checks = [
@@ -98,7 +109,7 @@ def validate_config(config):
                     seen_ids.add(graph['id'])
 
                 # 检查未声明字段
-                allowed_fields = {'type', 'name', 'edge_count', 'gap', 'dimensions', 'id'}
+                allowed_fields = {'type', 'name', 'edge_count', 'gap', 'dimensions', 'path', 'id'}
                 for key in graph:
                     if key not in allowed_fields:
                         errors.append(f"graphs[{idx}] 包含未声明的字段 '{key}'。")

@@ -33,14 +33,15 @@
 
 `graphs` 是一个列表，每个图形是一个字典。
 
-| 字段名       | 类型     | 必填 | 描述                                                                                                                                                                                                   |
-|--------------|----------|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora`, `RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`。         |
-| `name`       | 图形名称 | 条件 | 当 `type` 为 `RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora` 时必填，表示图形的名称。关于目前支持的图形名称，参见[目前支持的图形名称](#目前支持的图形名称)。 |
-| `edge_count` | 整数     | 条件 | 当 `type` 为 `RegularPolygon` 或 `RegularStarPolygon` 时必填，表示边数。                                                                                                                               |
-| `gap`        | 整数     | 条件 | 当 `type` 为 `RegularStarPolygon` 时必填，表示星形多边形的间隔。                                                                                                                                       |
-| `dimensions` | 整数     | 条件 | 当 `type` 为 `Simplex`, `Hypercube`, `Orthoplex` 时必填，表示图形的维度。                                                                                                                              |
-| `id`         | 字符串   | 是   | 图形的 `id`，不可重复，否则后声明的图形会覆盖前面的。                                                                                                                                                  |
+| 字段名       | 类型     | 必填 | 描述                                                                                                                                                                                                      |
+|--------------|----------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora`, `RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`, `OffFile`。 |
+| `name`       | 图形名称 | 条件 | 当 `type` 为 `RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora` 时必填，表示图形的名称。关于目前支持的图形名称，参见[目前支持的图形名称](#目前支持的图形名称)。    |
+| `edge_count` | 整数     | 条件 | 当 `type` 为 `RegularPolygon` 或 `RegularStarPolygon` 时必填，表示边数。                                                                                                                                  |
+| `gap`        | 整数     | 条件 | 当 `type` 为 `RegularStarPolygon` 时必填，表示星形多边形的间隔。                                                                                                                                          |
+| `dimensions` | 整数     | 条件 | 当 `type` 为 `Simplex`, `Hypercube`, `Orthoplex` 时必填，表示图形的维度。                                                                                                                                 |
+| `path`       | 文件路径 | 条件 | 当 `type` 为 `OffFile` 时必填，表示 OFF 文件的路径。                                                                                                                                                      |
+| `id`         | 字符串   | 是   | 图形的 `id`，不可重复，否则后声明的图形会覆盖前面的。                                                                                                                                                     |
 
 #### 2. 视频配置（`video`）
 

@@ -689,6 +689,8 @@ def create_rotation_video(config):
                 graph = generate_regular_star_polygon(graph_config['edge_count'], graph_config['gap'])
             case 'Simplex' | 'Hypercube' | 'Orthoplex':
                 graph = globals()['generate_' + graph_type.lower()](graph_config['dimensions'])
+            case 'OffFile':
+                graph = parse_off_file(graph_config['path'])
             case _:
                 raise ValueError('图形类型无效。')
         
@@ -750,56 +752,57 @@ def create_rotation_video(config):
         target_transformation_data[move_priority]['offset'] = offset
     
     frames = [generate_frame(graphs, transformation_datas)]
-    actions = config.get('actions', [])
+    actions = config.get('actions')
     
-    for frame in tqdm(range(1, get_last_frame(actions) + 1), desc="解析动作和生成帧"):
-        current_actions = get_current_actions(actions, frame)
-        for action, past in current_actions:
-            target = action['target']
-            _, _, dim = graphs[target]
-            target_transformation_data = transformation_datas[target]
-            
-            if action['type'] != 'rotate_complex':
-                priority = action.get('priority', 0)
-                if priority not in target_transformation_data:
-                    target_transformation_data[priority] = {
-                        'offset': np.zeros((dim)),
-                        'rotate': {}
-                    }
-            match action['type']:
-                case 'move':
-                    target_transformation_data[priority]['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
-                case 'rotate':
-                    center = tuple(action.get('center', [0] * dim))
-                    plane = action['plane']
-                    angle = action['angle']
-                                        
-                    if center not in target_transformation_data[priority]['rotate']:
-                        target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
-                    else:
-                        target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
-                case 'rotate_complexly':
-                    total_duration = get_duration(action)
-                    for r in action['rotations']:
-                        priority = r.get('priority', 0)
-                        center = tuple(r.get('center', [0] * dim))
-                        plane = r['plane']
-                        angle = r['angle']
-                        duration = r['duration']
-                        rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
-                        
-                        if priority not in target_transformation_data:
-                            target_transformation_data[priority] = {
-                                'offset': np.zeros((dim)),
-                                'rotate': {}
-                            }
-                        
+    if actions is not None:
+        for frame in tqdm(range(1, get_last_frame(actions) + 1), desc="解析动作和生成帧"):
+            current_actions = get_current_actions(actions, frame)
+            for action, past in current_actions:
+                target = action['target']
+                _, _, dim = graphs[target]
+                target_transformation_data = transformation_datas[target]
+                
+                if action['type'] != 'rotate_complexly':
+                    priority = action.get('priority', 0)
+                    if priority not in target_transformation_data:
+                        target_transformation_data[priority] = {
+                            'offset': np.zeros((dim)),
+                            'rotate': {}
+                        }
+                match action['type']:
+                    case 'move':
+                        target_transformation_data[priority]['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
+                    case 'rotate':
+                        center = tuple(action.get('center', [0] * dim))
+                        plane = action['plane']
+                        angle = action['angle']
+                                            
                         if center not in target_transformation_data[priority]['rotate']:
-                            target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+                            target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
                         else:
-                            target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
-        
-        frames.append(generate_frame(graphs, transformation_datas))
+                            target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                    case 'rotate_complexly':
+                        total_duration = get_duration(action)
+                        for r in action['rotations']:
+                            priority = r.get('priority', 0)
+                            center = tuple(r.get('center', [0] * dim))
+                            plane = r['plane']
+                            angle = r['angle']
+                            duration = r['duration']
+                            rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
+                            
+                            if priority not in target_transformation_data:
+                                target_transformation_data[priority] = {
+                                    'offset': np.zeros((dim)),
+                                    'rotate': {}
+                                }
+                            
+                            if center not in target_transformation_data[priority]['rotate']:
+                                target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+                            else:
+                                target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+            
+            frames.append(generate_frame(graphs, transformation_datas))
     
             
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
