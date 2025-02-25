@@ -5,7 +5,8 @@ import itertools
 from tqdm import tqdm
 import os
 
-from parseOFF import parse_off_file
+from parse_off import parse_off_file
+from validate_config import validate_config
 
 CUR_FOLDER = os.path.dirname(__file__)
 
@@ -652,23 +653,48 @@ def get_last_frame(actions):
     return get_last_frame_with_action(max(actions, key=get_last_frame_with_action))
 
 
+def generate_frame(graphs, transformation_datas):
+    frame = {}
+    for graph_id, (vertices, edges, dim) in graphs.items():
+        sorted_transformation_data = sorted(transformation_datas[graph_id].items(), key=lambda i: i[0], reverse=True)
+
+        transformed_vertices = vertices
+        for _, transformation_data in sorted_transformation_data:
+            for center, angles in transformation_data['rotate'].items():
+                transformed_vertices = rotate(angles, transformed_vertices, center)
+            transformed_vertices = move(transformation_data['offset'], transformed_vertices)
+        
+        frame[graph_id] = (transformed_vertices, edges)
+    
+    return frame
+
+
 def create_rotation_video(config):
-    vertices_config = config['vertices']
-    graph_type = vertices_config['type']
+    errors = validate_config(config)
+    if errors:
+        raise ValueError('配置文件中有错误：\n' + '\n'.join(errors))
+
+    graphs_config = config['graphs']
+    graphs = {}
+    for graph_config in tqdm(graphs_config, desc="生成顶点和边"):
+        graph_type = graph_config['type']
+        graph_id = graph_config['id']
+        
+        match graph_type:
+            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora':
+                graph = getattr(globals()[graph_type], graph_config['name'])()
+            case "RegularPolygon":
+                graph = generate_regular_polygon(graph_config['edge_count'])
+            case "RegularStarPolygon":
+                graph = generate_regular_star_polygon(graph_config['edge_count'], graph_config['gap'])
+            case 'Simplex' | 'Hypercube' | 'Orthoplex':
+                graph = globals()['generate_' + graph_type.lower()](graph_config['dimensions'])
+            case _:
+                raise ValueError('图形类型无效。')
+        
+        graph_dim = len(graph[0][0])
+        graphs[graph_id] = *graph, graph_dim
     
-    print("正在生成顶点和边……")
-    if graph_type in ['RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron', 'RegularStarPolychora']:
-        vertices, edges = getattr(globals()[graph_type], vertices_config['name'])()
-    elif graph_type == "RegularPolygon":
-        vertices, edges = generate_regular_polygon(vertices_config['edge_count'])
-    elif graph_type == "RegularStarPolygon":
-        vertices, edges = generate_regular_star_polygon(vertices_config['edge_count'], vertices_config['gap'])
-    elif graph_type in ['Simplex', 'Hypercube', 'Orthoplex']:
-        vertices, edges = globals()['generate_' + graph_type.lower()](vertices_config['dimensions'])
-    else:
-        raise ValueError('图形类型无效。')
-    
-    dim = len(vertices[0])
     
     video_config = config.get('video', {})
     output_path = video_config.get('output_path', os.path.join(CUR_FOLDER, 'rotation.mp4'))
@@ -684,92 +710,115 @@ def create_rotation_video(config):
     line_color = drawing_config.get('line_color', [0, 0, 0])
     background_color = drawing_config.get('background_color', [255, 255, 255])
         
-        
-    transformation_data = {
-        'offset': np.zeros((dim)),
-        'rotate': {}
-    }
-    initial = config.get('initial', None)
+    transformation_datas = {}
+    for graph_id, _ in graphs.items():
+        transformation_datas[graph_id] = {}
     
-    print("正在初始化帧……")
-    if initial is not None:
-        offset = initial.get('offset', [0] * dim)
+    initial_configs = config.get('initial', [])
+    
+    for initial_config in tqdm(initial_configs, desc="初始化帧"):
+        target = initial_config['target']
+        vertices, edges, dim = graphs[target]
+        target_transformation_data = transformation_datas[target]
+        
+        offset = initial_config.get('offset', [0] * dim)
+        move_priority = initial_config.get('move_priority', 0)
         
         rotations = []
-        for r in initial.get('rotations', []):
+        for r in initial_config.get('rotations', []):
             center = tuple(r.get('center', [0] * dim))
+            priority = r.get('priority', 0)
             plane = r['plane']
             angle = r['angle']
-                                
-            if center not in transformation_data['rotate']:
-                transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle))
+            
+            if priority not in target_transformation_data:
+                target_transformation_data[priority] = {
+                    'offset': np.zeros((dim)),
+                    'rotate': {}
+                }
+            
+            if center not in target_transformation_data[priority]['rotate']:
+                target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle))
             else:
-                transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle))
-
-        if offset is not None:
-            transformation_data['offset'] = offset
-
-        frame = vertices
-        for center, angles in transformation_data['rotate'].items():
-            frame = rotate(angles, frame, center)
-        frame = move(transformation_data['offset'], frame)
-        frames = [frame]
-    else:
-        frames = [vertices]
+                target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle))
+        
+        if move_priority not in target_transformation_data:
+            target_transformation_data[move_priority] = {
+                'offset': np.zeros((dim)),
+                'rotate': {}
+            }
+        target_transformation_data[move_priority]['offset'] = offset
     
+    frames = [generate_frame(graphs, transformation_datas)]
     actions = config.get('actions', [])
     
     for frame in tqdm(range(1, get_last_frame(actions) + 1), desc="解析动作和生成帧"):
         current_actions = get_current_actions(actions, frame)
         for action, past in current_actions:
+            target = action['target']
+            _, _, dim = graphs[target]
+            target_transformation_data = transformation_datas[target]
+            
+            if action['type'] != 'rotate_complex':
+                priority = action.get('priority', 0)
+                if priority not in target_transformation_data:
+                    target_transformation_data[priority] = {
+                        'offset': np.zeros((dim)),
+                        'rotate': {}
+                    }
             match action['type']:
                 case 'move':
-                    transformation_data['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
+                    target_transformation_data[priority]['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
                 case 'rotate':
                     center = tuple(action.get('center', [0] * dim))
                     plane = action['plane']
                     angle = action['angle']
                                         
-                    if center not in transformation_data['rotate']:
-                        transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                    if center not in target_transformation_data[priority]['rotate']:
+                        target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
                     else:
-                        transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
-                case 'rotate_complex':
+                        target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                case 'rotate_complexly':
                     total_duration = get_duration(action)
                     for r in action['rotations']:
+                        priority = r.get('priority', 0)
                         center = tuple(r.get('center', [0] * dim))
                         plane = r['plane']
                         angle = r['angle']
                         duration = r['duration']
                         rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
-                                            
-                        if center not in transformation_data['rotate']:
-                            transformation_data['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+                        
+                        if priority not in target_transformation_data:
+                            target_transformation_data[priority] = {
+                                'offset': np.zeros((dim)),
+                                'rotate': {}
+                            }
+                        
+                        if center not in target_transformation_data[priority]['rotate']:
+                            target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
                         else:
-                            transformation_data['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
+                            target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
         
-        new_frame = vertices
-        for center, angles in transformation_data['rotate'].items():
-            new_frame = rotate(angles, new_frame, center)
-        new_frame = move(transformation_data['offset'], new_frame)
-        frames.append(new_frame)
+        frames.append(generate_frame(graphs, transformation_datas))
+    
             
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
     
     last_img_arr = None
-    for vertices_frame in tqdm(frames, desc="绘制帧"):
+    for frame in tqdm(frames, desc="绘制帧"):
         img_arr = np.full((height, width, 3), background_color, dtype=np.uint8)
-        projected = [project_nd_to_2d_perspective(v, focal_length) for v in vertices_frame]
-        scaled = [(int(x*scale + width//2), height - (int(y*scale + height//2))) for x, y in projected]
-        
-        for edge in edges:
-            start, end = edge
-            start, end = scaled[start], scaled[end]
-            clipped = clip_line_segment(start, end, width, height)
-            if clipped is not None:
-                cv2.line(img_arr, *clipped, line_color, line_width)
-        
+        for vertices, edges in frame.values():
+            projected = [project_nd_to_2d_perspective(v, focal_length) for v in vertices]
+            scaled = [(int(x*scale + width//2), height - (int(y*scale + height//2))) for x, y in projected]
+            
+            for edge in edges:
+                start, end = edge
+                start, end = scaled[start], scaled[end]
+                clipped = clip_line_segment(start, end, width, height)
+                if clipped is not None:
+                    cv2.line(img_arr, *clipped, line_color, line_width)
+            
         video_writer.write(img_arr)
         last_img_arr = img_arr
     
@@ -785,5 +834,6 @@ if __name__ == "__main__":
 
     with open(os.path.join(CUR_FOLDER, 'config.toml'), 'r', encoding='utf-8') as f:
         config = toml.load(f)
+    
     create_rotation_video(config)
     

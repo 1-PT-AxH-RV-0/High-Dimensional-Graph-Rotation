@@ -1,6 +1,12 @@
-[vertices]
+[[graphs]]
 type = "Hypercube"
 dimensions = 4
+id = "g1"
+
+[[graphs]]
+type = "RegularPolychoron"
+name = "tesseract"
+id = "g2"
 
 [video]
 fps = 30
@@ -15,17 +21,33 @@ line_color = [230, 230, 230]
 background_color = [20, 20, 20]
 focal_length = 7
 
-[initial]
+[[initial]]
+rotations = [
+    { plane = [0, 2], angle = 45, priority = 1 }
+]
+offset = [1, 1, 1, 1]
+target = "g1"
+
+[[initial]]
 rotations = [
     { plane = [0, 2], angle = 45 }
 ]
-offset = [1, 1, 1, 1]
+offset = [-2, 0, 0, -2]
+target = "g2"
 
 [[actions]]
 type = "move"
-offset = [-2.0, -1.0, -1.0, -3.0]
+offset = [-3.0, -1.0, -1.0, -3.0]
 duration = 150
 start = 0
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [8.0, 1.0, 1.0, 3.0]
+duration = 150
+start = 0
+target = "g2"
 
 [[actions]]
 type = "rotate"
@@ -34,17 +56,57 @@ angle = 360
 center = [2, 0, 0, 0]
 duration = 100
 start = 150
+target = "g1"
 
 [[actions]]
-type = "rotate_complex"
+type = "rotate"
+plane = [0, 2]
+angle = 360
+center = [6, 1, 1, 1]
+duration = 100
+start = 200
+priority = -1
+target = "g2"
+
+[[actions]]
+type = "rotate_complexly"
 rotations = [
     { plane = [0, 2], angle = -45, duration = 200 },
     { plane = [2, 3], angle = 360, duration = 200 }
 ]
 start = 250
+target = "g1"
+
+[[actions]]
+type = "rotate_complexly"
+rotations = [
+    { plane = [0, 2], angle = -45, duration = 200 },
+    { plane = [2, 3], angle = 270, duration = 200 },
+    { plane = [1, 2], angle = 270, duration = 200, center = [0, -3, 0, 0], priority = 1 }
+]
+start = 300
+target = "g2"
 
 [[actions]]
 type = "move"
-offset = [1.0, 0.0, 0.0, 2.0]
+offset = [2.0, 0.0, 0.0, 2.0]
 duration = 150
-start = 250
+start = 500
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [-6, -1, -1, -1]
+duration = 150
+start = 500
+target = "g2"
+
+[[actions]]
+type = "rotate"
+plane = [1, 2]
+angle = 90
+center = [0, -3, 0, 0]
+duration = 150
+start = 500
+target = "g2"
+priority = 1
