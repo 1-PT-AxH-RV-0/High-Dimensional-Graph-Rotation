@@ -634,6 +634,55 @@ class RegularStarPolychora:
         return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gax.off'))
 
 
+class RegularPolyhedronCompounds:
+    @staticmethod
+    def stellated_octahedron():
+        vertices = []
+        
+        coords = np.ones((3)) * (np.sqrt(2) / 4)
+        vertices.extend(generate_coords(coords))
+        
+        vertices = np.unique(vertices, axis=0)
+        
+        return vertices, generate_edges(vertices, 1)
+    
+    @staticmethod
+    def chiricosahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Compound_of_five_tetrahedra.off'))
+    
+    @staticmethod
+    def icosicosahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Compound_of_ten_tetrahedra.off'))
+
+    @staticmethod
+    def rhombihedron():
+        vertices = []
+        
+        coords1 = np.ones((3)) / 2
+        coords2 = [(np.sqrt(5) + 1) / 4, (np.sqrt(5) - 1) / 4, 0]
+        
+        vertices.extend(generate_coords(coords1))
+        vertices.extend(generate_coords(coords2, even_permutations))
+        
+        vertices = np.unique(vertices, axis=0)
+        
+        return vertices, generate_edges(vertices, 1)
+
+    @staticmethod
+    def small_icosicosahedron():
+        vertices = []
+        
+        coords1 = [np.sqrt(2) / 2, 0, 0]
+        coords2 = [(np.sqrt(10) + np.sqrt(2)) / 8, (np.sqrt(10) - np.sqrt(2)) / 8, np.sqrt(2) / 4]
+        
+        vertices.extend(generate_coords(coords1))
+        vertices.extend(generate_coords(coords2, even_permutations))
+        
+        vertices = np.unique(vertices, axis=0)
+        
+        return vertices, generate_edges(vertices, 1)
+
+
 def get_duration(action):
     duration = action.get('duration')
     if duration is None:
@@ -681,7 +730,7 @@ def create_rotation_video(config):
         graph_id = graph_config['id']
         
         match graph_type:
-            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora':
+            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora' | 'RegularPolyhedronCompounds':
                 graph = getattr(globals()[graph_type], graph_config['name'])()
             case "RegularPolygon":
                 graph = generate_regular_polygon(graph_config['edge_count'])
@@ -695,6 +744,7 @@ def create_rotation_video(config):
                 raise ValueError('图形类型无效。')
         
         graph_dim = len(graph[0][0])
+        print(len(graph[1]))
         graphs[graph_id] = *graph, graph_dim
     
     
@@ -790,6 +840,8 @@ def create_rotation_video(config):
                             angle = r['angle']
                             duration = r['duration']
                             rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
+                            if past > duration:
+                                rotation_scale = 0
                             
                             if priority not in target_transformation_data:
                                 target_transformation_data[priority] = {
@@ -818,9 +870,12 @@ def create_rotation_video(config):
             for edge in edges:
                 start, end = edge
                 start, end = scaled[start], scaled[end]
-                clipped = clip_line_segment(start, end, width, height)
-                if clipped is not None:
-                    cv2.line(img_arr, *clipped, line_color, line_width)
+                if 0 < start[0] <= width and 0 < start[1] <= height and 0 < end[0] <= width and 0 < end[1] <= height:
+                    cv2.line(img_arr, start, end, line_color, line_width)
+                else:
+                    clipped = clip_line_segment(start, end, width, height)
+                    if clipped is not None:
+                        cv2.line(img_arr, *clipped, line_color, line_width)
             
         video_writer.write(img_arr)
         last_img_arr = img_arr

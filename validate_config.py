@@ -24,6 +24,10 @@ def validate_config(config):
             'great_stellated_hecatonicosachoron', 'grand_stellated_hecatonicosachoron',
             'great_grand_stellated_hecatonicosachoron', 'faceted_hexacosichoron',
             'great_faceted_hexacosichoron', 'grand_hexacosichoron'
+        ],
+        'RegularPolyhedronCompounds': [
+            'stellated_octahedron', 'chiricosahedron', 'icosicosahedron',
+            'rhombihedron', 'small_icosicosahedron'
         ]
     }
 
@@ -54,8 +58,8 @@ def validate_config(config):
                 graph_type = graph.get('type')
                 valid_types = {
                     'RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron',
-                    'RegularStarPolychora', 'RegularPolygon', 'RegularStarPolygon',
-                    'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
+                    'RegularStarPolychora', 'RegularPolyhedronCompounds', 'RegularPolygon',
+                    'RegularStarPolygon', 'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
                 }
                 if graph_type and graph_type not in valid_types:
                     errors.append(f"graphs[{idx}].type 无效值 '{graph_type}'。")

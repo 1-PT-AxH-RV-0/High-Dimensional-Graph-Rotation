@@ -35,7 +35,7 @@
 
 | 字段名       | 类型     | 必填 | 描述                                                                                                                                                                                                      |
 |--------------|----------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora`, `RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`, `OffFile`。 |
+| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora`, `RegularPolyhedronCompounds`, `RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`, `OffFile`。 |
 | `name`       | 图形名称 | 条件 | 当 `type` 为 `RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora` 时必填，表示图形的名称。关于目前支持的图形名称，参见[目前支持的图形名称](#目前支持的图形名称)。    |
 | `edge_count` | 整数     | 条件 | 当 `type` 为 `RegularPolygon` 或 `RegularStarPolygon` 时必填，表示边数。                                                                                                                                  |
 | `gap`        | 整数     | 条件 | 当 `type` 为 `RegularStarPolygon` 时必填，表示星形多边形的间隔。                                                                                                                                          |
@@ -210,7 +210,7 @@ target = "g2"
 type = "rotate_complexly"
 rotations = [
     { plane = [0, 2], angle = -45, duration = 200 },
-    { plane = [2, 3], angle = 360, duration = 200 }
+    { plane = [2, 3], angle = 360, duration = 100 }
 ]
 start = 250
 target = "g1"
@@ -296,3 +296,14 @@ priority = 1
   | `faceted_hexacosichoron`                   | 刻面正六百胞体         |
   | `great_faceted_hexacosichoron`             | 大刻面正六百胞体       |
   | `grand_hexacosichoron`                     | 巨正六百胞体           |
+
+- `RegularPolyhedronCompounds`（复合正多面体）：
+  
+  | 图形名称                | 中文名                                     |
+  |-------------------------|--------------------------------------------|
+  | `stellated_octahedron`  | 星状正八面体（二复合正四面体）             |
+  | `chiricosahedron`       | 手性正二十面体（五复合正四面体）           |
+  | `icosicosahedron`       | 二十二十面体（十复合正四面体）             |
+  | `rhombihedron`          | （我真不会翻译这个玩意）（五复合正六面体） |
+  | `small_icosicosahedron` | 小二十二十面体（五复合正八面体）           |
+  
