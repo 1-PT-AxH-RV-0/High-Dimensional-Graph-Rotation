@@ -302,8 +302,8 @@ priority = 1
   | 图形名称                | 中文名                                     |
   |-------------------------|--------------------------------------------|
   | `stellated_octahedron`  | 星状正八面体（二复合正四面体）             |
-  | `chiricosahedron`       | 手性正二十面体（五复合正四面体）           |
-  | `icosicosahedron`       | 二十二十面体（十复合正四面体）             |
-  | `rhombihedron`          | （我真不会翻译这个玩意）（五复合正六面体） |
-  | `small_icosicosahedron` | 小二十二十面体（五复合正八面体）           |
+  | `chiricosahedron`       | 五复合正四面体                             |
+  | `icosicosahedron`       | 十复合正四面体                             |
+  | `rhombihedron`          | 五复合正六面体                             |
+  | `small_icosicosahedron` | 五复合正八面体                             |
   

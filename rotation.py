@@ -744,7 +744,6 @@ def create_rotation_video(config):
                 raise ValueError('图形类型无效。')
         
         graph_dim = len(graph[0][0])
-        print(len(graph[1]))
         graphs[graph_id] = *graph, graph_dim
     
     
