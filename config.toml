@@ -1,6 +1,6 @@
 [[graphs]]
-type = "OffFile"
-path = "/storage/emulated/0/下载/Download/Dodecadodecahedron.off"
+type = "RegularPolyhedron"
+name = "hexahedron"
 id = "g1"
 
 [video]
@@ -10,16 +10,16 @@ height = 1080
 end_pause_frames = 60
 
 [drawing]
-scale = 650
-line_width = 5
+scale = 200
+line_width = 1
 line_color = [230, 230, 230]
 background_color = [20, 20, 20]
-focal_length = 7
+focal_length = 12
 
 [[actions]]
 type = "rotate"
 plane = [0, 2]
 angle = 360
-duration = 400
+duration = 100
 start = 0
 target = "g1"

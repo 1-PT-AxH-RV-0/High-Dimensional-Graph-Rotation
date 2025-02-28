@@ -3,6 +3,7 @@ import cv2
 import math
 import itertools
 from tqdm import tqdm
+from copy import deepcopy
 import os
 
 from parse_off import parse_off_file
@@ -550,15 +551,15 @@ class RegularStarPolyhedron:
 class RegularStarPolychora:
     @staticmethod
     def great_hecatonicosachoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gohi.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gohi.off'))
    
     @staticmethod
     def grand_hecatonicosachoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gahi.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gahi.off'))
     
     @staticmethod
     def great_grand_hecatonicosachoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gaghi.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gaghi.off'))
     
     @staticmethod
     def small_stellated_hecatonicosachoron():
@@ -595,7 +596,7 @@ class RegularStarPolychora:
     
     @staticmethod
     def grand_stellated_hecatonicosachoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gashi.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gashi.off'))
     
     @staticmethod
     def great_grand_stellated_hecatonicosachoron():
@@ -623,15 +624,15 @@ class RegularStarPolychora:
     
     @staticmethod
     def faceted_hexacosichoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Fix.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Fix.off'))
     
     @staticmethod
     def great_faceted_hexacosichoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gofix.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gofix.off'))
     
     @staticmethod
     def grand_hexacosichoron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Gax.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Gax.off'))
 
 
 class RegularPolyhedronCompounds:
@@ -642,17 +643,15 @@ class RegularPolyhedronCompounds:
         coords = np.ones((3)) * (np.sqrt(2) / 4)
         vertices.extend(generate_coords(coords))
         
-        vertices = np.unique(vertices, axis=0)
-        
         return vertices, generate_edges(vertices, 1)
     
     @staticmethod
     def chiricosahedron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Compound_of_five_tetrahedra.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Compound_of_five_tetrahedra.off'))
     
     @staticmethod
     def icosicosahedron():
-        return parse_off_file(os.path.join(CUR_FOLDER, 'offData', 'Compound_of_ten_tetrahedra.off'))
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Compound_of_ten_tetrahedra.off'))
 
     @staticmethod
     def rhombihedron():
@@ -730,7 +729,7 @@ def create_rotation_video(config):
         graph_id = graph_config['id']
         
         match graph_type:
-            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora' | 'RegularPolyhedronCompounds':
+            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora' | 'RegularPolyhedronCompounds' | 'UniformPolyhedronCompounds':
                 graph = getattr(globals()[graph_type], graph_config['name'])()
             case "RegularPolygon":
                 graph = generate_regular_polygon(graph_config['edge_count'])
@@ -756,7 +755,7 @@ def create_rotation_video(config):
     
     drawing_config = config.get('drawing', {})
     scale = drawing_config.get('scale', 300)
-    focal_length = drawing_config.get('focal_length', 5)
+    focal_length = drawing_config.get('focal_length', 12)
     line_width = drawing_config.get('line_width', 5)
     line_color = drawing_config.get('line_color', [0, 0, 0])
     background_color = drawing_config.get('background_color', [255, 255, 255])
@@ -800,7 +799,7 @@ def create_rotation_video(config):
             }
         target_transformation_data[move_priority]['offset'] = offset
     
-    frames = [generate_frame(graphs, transformation_datas)]
+    frames = [deepcopy(transformation_datas)]
     actions = config.get('actions')
     
     if actions is not None:
@@ -853,14 +852,15 @@ def create_rotation_video(config):
                             else:
                                 target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * rotation_scale
             
-            frames.append(generate_frame(graphs, transformation_datas))
+            frames.append(deepcopy(transformation_datas))
     
             
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
     
     last_img_arr = None
-    for frame in tqdm(frames, desc="绘制帧"):
+    for transformation_datas_frame in tqdm(frames, desc="绘制帧"):
+        frame = generate_frame(graphs, transformation_datas_frame)
         img_arr = np.full((height, width, 3), background_color, dtype=np.uint8)
         for vertices, edges in frame.values():
             projected = [project_nd_to_2d_perspective(v, focal_length) for v in vertices]

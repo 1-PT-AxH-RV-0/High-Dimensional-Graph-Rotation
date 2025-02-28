@@ -8,41 +8,20 @@ def tuple_to_pairs(input_tuple):
     return pairs
 
 
-def is_float(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
-
 def parse_off_file(file_path):
-    vertices = []
     edges = set()
 
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
-    lines = [line.strip() for line in lines]
-    in_vertices = False
-    in_faces = False
+    lines = [line.strip() for line in lines if line.strip() and not line.startswith('#')][1:]
 
-    for line in lines:
-        if line.startswith('#'):
-            in_vertices = False
-            in_faces = False
-        if '# Vertices' in line:
-            in_vertices = True
-            in_faces = False
-        if '# Faces' in line:
-            in_vertices = False
-            in_faces = True
-        if line and all(map(is_float, line.split())):
-            if in_vertices:
-                vertices.append(np.array(list(map(float, line.split()))))
-            elif in_faces:
-                coords = list(map(int, line.split()))[1:]
-                pairs = tuple_to_pairs(coords)
-                edges.update(map(lambda p: tuple(sorted(p)), pairs))
+    vertices_count, faces_count, *_ = map(int, lines[0].split())
+    lines = lines[1:]
+    
+    vertices = list(map(lambda l: np.array(list(map(float, l.split()))), lines[:vertices_count]))
+    faces = list(map(lambda l: list(map(int, l.split('\t')[0].strip().split()[1:])), lines[vertices_count:vertices_count + faces_count]))
+    for face in faces:
+        edges.update(map(lambda p: tuple(sorted(p)), tuple_to_pairs(face)))
         
     return vertices, list(edges)

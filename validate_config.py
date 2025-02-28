@@ -58,8 +58,9 @@ def validate_config(config):
                 graph_type = graph.get('type')
                 valid_types = {
                     'RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron',
-                    'RegularStarPolychora', 'RegularPolyhedronCompounds', 'RegularPolygon',
-                    'RegularStarPolygon', 'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
+                    'RegularStarPolychora', 'RegularPolyhedronCompounds',
+                    'RegularPolygon', 'RegularStarPolygon',
+                    'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
                 }
                 if graph_type and graph_type not in valid_types:
                     errors.append(f"graphs[{idx}].type 无效值 '{graph_type}'。")
