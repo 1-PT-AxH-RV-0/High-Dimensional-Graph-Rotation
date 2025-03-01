@@ -29,7 +29,7 @@ def sinspace_piece(start, stop, index, num=50, endpoint=True):
     
     return scaled_values - prev_scaled_values
 
-def linspace_piece(start, stop, _=None, num=50, endpoint=True):
+def linspace_piece(start, stop, index, num=50, endpoint=True):
     if index > num:
         return 0
     if endpoint:
@@ -768,12 +768,6 @@ def create_rotation_video(config):
     line_width = drawing_config.get('line_width', 5)
     line_color = drawing_config.get('line_color', [0, 0, 0])[::-1]
     background_color = drawing_config.get('background_color', [255, 255, 255])[::-1]
-    ease = drawing_config.get('ease', 'sin')
-    match ease:
-        case 'sin':
-            ease_func = sinspace_piece
-        case 'linear':
-            ease_func = linspace_piece
     
     transformation_datas = {}
     for graph_id, _ in graphs.items():
@@ -824,6 +818,13 @@ def create_rotation_video(config):
                 target = action['target']
                 _, _, dim = graphs[target]
                 target_transformation_data = transformation_datas[target]
+                match action.get('ease', 'sin'):
+                    case 'sin':
+                        ease_func = sinspace_piece
+                    case 'linear':
+                        ease_func = linspace_piece
+                    case _:
+                        raise ValueError('过渡函数无效。')
                 
                 if action['type'] != 'rotate_complexly':
                     priority = action.get('priority', 0)

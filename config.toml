@@ -1,26 +1,63 @@
 [[graphs]]
-type = "RegularPolyhedron"
-name = "hexahedron"
+type = "RegularPolychoron"
+name = "tesseract"
 id = "g1"
 
 [video]
 fps = 30
-width = 1920
-height = 1080
-end_pause_frames = 60
+width = 800
+height = 800
+end_pause_frames = 0
 
 [drawing]
-scale = 200
+scale = 150
 line_width = 3
 line_color = [230, 230, 230]
-background_color = [50, 20, 20]
+background_color = [20, 20, 20]
 focal_length = 10
-ease = 'linear'
+
+[[initial]]
+offset = [0.0, 0.5, 0.0, 0.0]
+target = "g1"
 
 [[actions]]
-type = "rotate"
-plane = [0, 2]
-angle = 360
-duration = 100
+type = "rotate_complexly"
+rotations = [
+  { plane = [0, 2], angle = 360, duration = 120 },
+  { plane = [1, 2], angle = 360, duration = 120 },
+  { plane = [1, 3], angle = 90, duration = 120 },
+  { plane = [2, 3], angle = 180, duration = 120 },
+  { plane = [0, 3], angle = 270, duration = 120 },
+  { plane = [0, 1], angle = 180, duration = 120 }
+]
 start = 0
+ease = "linear"
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [0, -1, 0, 0]
+duration = 30
+start = 0
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [0, 1, 0, 0]
+duration = 30
+start = 30
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [0, -1, 0, 0]
+duration = 30
+start = 60
+target = "g1"
+
+[[actions]]
+type = "move"
+offset = [0, 1, 0, 0]
+duration = 30
+start = 90
 target = "g1"

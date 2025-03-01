@@ -164,15 +164,10 @@ def validate_config(config):
                 ('scale', (int, float), '数字'),
                 ('focal_length', (int, float), '数字'),
                 ('line_width', (int, float), '数字'),
-                ('ease', str, '字符串')
             ]
             for field, expected_type, expected_type_name in type_checks:
                 if field in drawing and not isinstance(drawing[field], expected_type):
                     errors.append(f"drawing.{field} 应为{expected_type_name}。")
-
-            allowed_ease = ['sin', 'linear']
-            if 'ease' in drawing and drawing['ease'] not in allowed_ease:
-                errors.append(f"drawing.ease 取值只能为：{', '.join(allowed_ease)}。")
 
     # 检查initial部分
     if 'initial' in config:
@@ -281,8 +276,13 @@ def validate_config(config):
                                     if field not in rotation:
                                         errors.append(f"actions[{idx}].rotations[{r_idx}] 缺少字段 '{field}'。")
 
+                # 检查过渡函数
+                allowed_ease = ['sin', 'linear']
+                if 'ease' in action and action['ease'] not in allowed_ease:
+                    errors.append(f"actions[{idx}].ease 取值只能为：{', '.join(allowed_ease)}。")
+                
                 # 检查未声明字段
-                allowed_base = {'type', 'start', 'target'}
+                allowed_base = {'type', 'start', 'target', 'ease'}
                 action_allowed = {
                     'move': allowed_base | {'offset', 'duration', 'priority'},
                     'rotate': allowed_base | {'plane', 'angle', 'duration', 'center', 'priority'},
