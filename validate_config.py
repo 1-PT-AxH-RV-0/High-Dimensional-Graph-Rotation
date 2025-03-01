@@ -47,15 +47,15 @@ def validate_config(config):
             'rectified_great_dodecahedron', 'rectified_small_stellated_dodecahedron',
             'rectified_great_stellated_dodecahedron', 'rectified_great_icosahedron'
         ],
-        'RhombiRectifiedRegularPolyhedron': [
+        'CantellatedRegularPolyhedron': [
             'rhombi_rectified_tetrahedron', 'rhombi_rectified_hexahedron',
             'rhombi_rectified_octahedron', 'rhombi_rectified_dodecahedron',
             'rhombi_rectified_icosahedron'
         ],
-        'GreatRhombiRectifiedRegularPolyhedron': [
-            'great_rhombi_rectified_tetrahedron', 'great_rhombi_rectified_hexahedron',
-            'great_rhombi_rectified_octahedron', 'great_rhombi_rectified_dodecahedron',
-            'great_rhombi_rectified_icosahedron'
+        'CantitruncatedRegularPolyhedron': [
+            'cantitruncated_tetrahedron', 'cantitruncated_hexahedron',
+            'cantitruncated_octahedron', 'cantitruncated_dodecahedron',
+            'cantitruncated_icosahedron'
         ]
     }
 

@@ -346,22 +346,22 @@ priority = 1
   | `rectified_great_stellated_dodecahedron` | 截半大星形十二面体（等价于大截半二十面体)  |
   | `rectified_great_icosahedron`            | 截半二十面体（等价于截半大星形十二面体)    |
 
-- `RhombiRectifiedRegularPolyhedron`（小斜方截半正多面体）
+- `CantellatedRegularPolyhedron`（小斜方截半正多面体）
 
-  | 图形名称                        | 中文名                                         |
-  |---------------------------------|------------------------------------------------|
-  | `rhombi_rectified_tetrahedron`  | 小斜方截半四面体（等价于截半立方体）           |
-  | `rhombi_rectified_hexahedron`   | 小斜方截半立方体                               |
-  | `rhombi_rectified_octahedron`   | 小斜方截半八面体（等价于小斜方截半立方体）     |
-  | `rhombi_rectified_dodecahedron` | 小斜方截半十二面体                             |
-  | `rhombi_rectified_icosahedron`  | 小斜方截半二十面体（等价于小斜方截半十二面体） |
+  | 图形名称                   | 中文名                                         |
+  |----------------------------|------------------------------------------------|
+  | `cantellated_tetrahedron`  | 小斜方截半四面体（等价于截半立方体）           |
+  | `cantellated_hexahedron`   | 小斜方截半立方体                               |
+  | `cantellated_octahedron`   | 小斜方截半八面体（等价于小斜方截半立方体）     |
+  | `cantellated_dodecahedron` | 小斜方截半十二面体                             |
+  | `cantellated_icosahedron`  | 小斜方截半二十面体（等价于小斜方截半十二面体） |
 
-- `GreatRhombiRectifiedRegularPolyhedron`（大斜方截半正多面体）
+- `CantitruncatedRegularPolyhedron`（大斜方截半正多面体）
 
-  | 图形名称                              | 中文名                                         |
-  |---------------------------------------|------------------------------------------------|
-  | `great_rhombi_rectified_tetrahedron`  | 大斜方截半四面体（等价于截角八面体）           |
-  | `great_rhombi_rectified_hexahedron`   | 大斜方截半立方体                               |
-  | `great_rhombi_rectified_octahedron`   | 大斜方截半八面体（等价于大斜方截半立方体）     |
-  | `great_rhombi_rectified_dodecahedron` | 大斜方截半十二面体                             |
-  | `great_rhombi_rectified_icosahedron`  | 大斜方截半二十面体（等价于大斜方截半十二面体） |
+  | 图形名称                      | 中文名                                         |
+  |-------------------------------|------------------------------------------------|
+  | `cantitruncated_tetrahedron`  | 大斜方截半四面体（等价于截角八面体）           |
+  | `cantitruncated_hexahedron`   | 大斜方截半立方体                               |
+  | `cantitruncated_octahedron`   | 大斜方截半八面体（等价于大斜方截半立方体）     |
+  | `cantitruncated_dodecahedron` | 大斜方截半十二面体                             |
+  | `cantitruncated_icosahedron`  | 大斜方截半二十面体（等价于大斜方截半十二面体） |
