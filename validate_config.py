@@ -147,7 +147,7 @@ def validate_config(config):
         if not isinstance(drawing, dict):
             errors.append("drawing 必须是一个字典。")
         else:
-            allowed_fields = {'scale', 'focal_length', 'line_width', 'line_color', 'background_color'}
+            allowed_fields = {'scale', 'focal_length', 'line_width', 'line_color', 'background_color', 'ease'}
             for key in drawing:
                 if key not in allowed_fields:
                     errors.append(f"drawing 包含未声明的字段 '{key}'。")
@@ -161,13 +161,18 @@ def validate_config(config):
                         errors.append(f"drawing.{color_field} 应为包含 3 个整数的列表。")
 
             type_checks = [
-                ('scale', (int, float)),
-                ('focal_length', (int, float)),
-                ('line_width', (int, float)),
+                ('scale', (int, float), '数字'),
+                ('focal_length', (int, float), '数字'),
+                ('line_width', (int, float), '数字'),
+                ('ease', str, '字符串')
             ]
-            for field, expected_type in type_checks:
+            for field, expected_type, expected_type_name in type_checks:
                 if field in drawing and not isinstance(drawing[field], expected_type):
-                    errors.append(f"drawing.{field} 应为数字类型。")
+                    errors.append(f"drawing.{field} 应为{expected_type_name}。")
+
+            allowed_ease = ['sin', 'linear']
+            if 'ease' in drawing and drawing['ease'] not in allowed_ease:
+                errors.append(f"drawing.ease 取值只能为：{', '.join(allowed_ease)}。")
 
     # 检查initial部分
     if 'initial' in config:

@@ -11,10 +11,11 @@ end_pause_frames = 60
 
 [drawing]
 scale = 200
-line_width = 1
+line_width = 3
 line_color = [230, 230, 230]
-background_color = [20, 20, 20]
-focal_length = 12
+background_color = [50, 20, 20]
+focal_length = 10
+ease = 'linear'
 
 [[actions]]
 type = "rotate"

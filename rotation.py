@@ -27,6 +27,11 @@ def sinspace_piece(start, stop, index, num=50, endpoint=True):
     
     return scaled_values - prev_scaled_values
 
+def linspace_piece(start, stop, _=None, num=50, endpoint=True):
+    if endpoint:
+        return (start - stop) / num
+    return (start - stop) / (num - 1)
+    
 
 def pad_arrays(arrays):
     max_length = max(len(arr) for arr in arrays)
@@ -757,9 +762,15 @@ def create_rotation_video(config):
     scale = drawing_config.get('scale', 300)
     focal_length = drawing_config.get('focal_length', 12)
     line_width = drawing_config.get('line_width', 5)
-    line_color = drawing_config.get('line_color', [0, 0, 0])
-    background_color = drawing_config.get('background_color', [255, 255, 255])
-        
+    line_color = drawing_config.get('line_color', [0, 0, 0])[::-1]
+    background_color = drawing_config.get('background_color', [255, 255, 255])[::-1]
+    ease = drawing_config.get('ease', 'sin')
+    match ease:
+        case 'sin':
+            ease_func = sinspace_piece
+        case 'linear':
+            ease_func = linspace_piece
+    
     transformation_datas = {}
     for graph_id, _ in graphs.items():
         transformation_datas[graph_id] = {}
@@ -819,16 +830,16 @@ def create_rotation_video(config):
                         }
                 match action['type']:
                     case 'move':
-                        target_transformation_data[priority]['offset'] += np.array(action['offset']) * sinspace_piece(0, 1, past, action['duration'])
+                        target_transformation_data[priority]['offset'] += np.array(action['offset']) * ease_func(0, 1, past, action['duration'])
                     case 'rotate':
                         center = tuple(action.get('center', [0] * dim))
                         plane = action['plane']
                         angle = action['angle']
                                             
                         if center not in target_transformation_data[priority]['rotate']:
-                            target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                            target_transformation_data[priority]['rotate'][center] = np.array(get_rot_ang(dim, plane, angle)) * ease_func(0, 1, past, action['duration'])
                         else:
-                            target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * sinspace_piece(0, 1, past, action['duration'])
+                            target_transformation_data[priority]['rotate'][center] += np.array(get_rot_ang(dim, plane, angle)) * ease_func(0, 1, past, action['duration'])
                     case 'rotate_complexly':
                         total_duration = get_duration(action)
                         for r in action['rotations']:
@@ -837,7 +848,7 @@ def create_rotation_video(config):
                             plane = r['plane']
                             angle = r['angle']
                             duration = r['duration']
-                            rotation_scale = sinspace_piece(0, duration / total_duration, past, duration)
+                            rotation_scale = ease_func(0, duration / total_duration, past, duration)
                             if past > duration:
                                 rotation_scale = 0
                             
