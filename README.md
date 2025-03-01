@@ -33,15 +33,15 @@
 
 `graphs` 是一个列表，每个图形是一个字典。
 
-| 字段名       | 类型     | 必填 | 描述                                                                                                                                                                                                      |
-|--------------|----------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora`, `RegularPolyhedronCompounds`, `RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`, `OffFile`。 |
-| `name`       | 图形名称 | 条件 | 当 `type` 为 `RegularPolyhedron`, `RegularPolychoron`, `RegularStarPolyhedron`, `RegularStarPolychora` 时必填，表示图形的名称。关于目前支持的图形名称，参见[目前支持的图形名称](#目前支持的图形名称)。    |
-| `edge_count` | 整数     | 条件 | 当 `type` 为 `RegularPolygon` 或 `RegularStarPolygon` 时必填，表示边数。                                                                                                                                  |
-| `gap`        | 整数     | 条件 | 当 `type` 为 `RegularStarPolygon` 时必填，表示星形多边形的间隔。                                                                                                                                          |
-| `dimensions` | 整数     | 条件 | 当 `type` 为 `Simplex`, `Hypercube`, `Orthoplex` 时必填，表示图形的维度。                                                                                                                                 |
-| `path`       | 文件路径 | 条件 | 当 `type` 为 `OffFile` 时必填，表示 OFF 文件的路径。                                                                                                                                                      |
-| `id`         | 字符串   | 是   | 图形的 `id`，不可重复，否则后声明的图形会覆盖前面的。                                                                                                                                                     |
+| 字段名       | 类型     | 必填 | 描述                                                                                                                                                                         |
+|--------------|----------|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `type`       | 字符串   | 是   | 图形类型，支持以下值：`RegularPolygon`, `RegularStarPolygon`, `Simplex`, `Hypercube`, `Orthoplex`, `OffFile` 和在[目前支持的图形名称](#目前支持的图形名称)中被声明的字段。 |
+| `name`       | 图形名称 | 条件 | 当 `type` 为在[目前支持的图形名称](#目前支持的图形名称)中被声明的字段时必填，表示图形的名称。关于目前支持的图形名称，参见[目前支持的图形名称](#目前支持的图形名称)。         |
+| `edge_count` | 整数     | 条件 | 当 `type` 为 `RegularPolygon` 或 `RegularStarPolygon` 时必填，表示边数。                                                                                                     |
+| `gap`        | 整数     | 条件 | 当 `type` 为 `RegularStarPolygon` 时必填，表示星形多边形的间隔。                                                                                                             |
+| `dimensions` | 整数     | 条件 | 当 `type` 为 `Simplex`, `Hypercube`, `Orthoplex` 时必填，表示图形的维度。                                                                                                    |
+| `path`       | 文件路径 | 条件 | 当 `type` 为 `OffFile` 时必填，表示 OFF 文件的路径。                                                                                                                         |
+| `id`         | 字符串   | 是   | 图形的 `id`，不可重复，否则后声明的图形会覆盖前面的。                                                                                                                        |
 
 #### 2. 视频配置（`video`）
 
@@ -258,7 +258,7 @@ priority = 1
   | 图形名称       | 中文名     |
   |----------------|------------|
   | `tetrahedron`  | 正四面体   |
-  | `hexahedron`   | 正六面体   |
+  | `hexahedron`   | 立方体     |
   | `octahedron`   | 正八面体   |
   | `dodecahedron` | 正十二面体 |
   | `icosahedron`  | 正二十面体 |
@@ -268,43 +268,100 @@ priority = 1
   | 图形名称             | 中文名         |
   |----------------------|----------------|
   | `pentachoron`        | 正五胞体       |
-  | `tesseract`          | 正八胞体       |
+  | `tesseract`          | 超立方体       |
   | `hexadecachoron`     | 正十六胞体     |
   | `icositetrachoron`   | 正二十四胞体   |
   | `hecatonicosachoron` | 正一百二十胞体 |
   | `hexacosichoron`     | 正六百胞体     |
 
-- `RegularStarPolyhedron`（星状正多面体）：
+- `RegularStarPolyhedron`（星形正多面体）：
   
-  | 图形名称                        | 中文名           |
-  |---------------------------------|------------------|
-  | `great_dodecahedron`            | 大正十二面体     |
-  | `small_stellated_dodecahedron`  | 小星状正十二面体 |
-  | `great_stellated_dodecahedron`  | 大星状正十二面体 |
-  | `great_icosahedron`             | 大正二十面体     |
+  | 图形名称                        | 中文名         |
+  |---------------------------------|----------------|
+  | `great_dodecahedron`            | 大十二面体     |
+  | `small_stellated_dodecahedron`  | 小星形十二面体 |
+  | `great_stellated_dodecahedron`  | 大星形十二面体 |
+  | `great_icosahedron`             | 大二十面体     |
 
-- `RegularStarPolychora`（星状正多胞体）：
+- `RegularStarPolychora`（星形正多胞体）：
   
-  | 图形名称                                   | 中文名                 |
-  |--------------------------------------------|------------------------|
-  | `great_hecatonicosachoron`                 | 大正一百二十胞体       |
-  | `grand_hecatonicosachoron`                 | 巨正一百二十胞体       |
-  | `great_grand_hecatonicosachoron`           | 巨大正一百二十胞体     |
-  | `small_stellated_hecatonicosachoron`       | 小星状正一百二十胞体   |
-  | `great_stellated_hecatonicosachoron`       | 大星状正一百二十胞体   |
-  | `grand_stellated_hecatonicosachoron`       | 巨星状正一百二十胞体   |
-  | `great_grand_stellated_hecatonicosachoron` | 巨大星状正一百二十胞体 |
-  | `faceted_hexacosichoron`                   | 刻面正六百胞体         |
-  | `great_faceted_hexacosichoron`             | 大刻面正六百胞体       |
-  | `grand_hexacosichoron`                     | 巨正六百胞体           |
+  | 图形名称                                   | 中文名               |
+  |--------------------------------------------|----------------------|
+  | `great_hecatonicosachoron`                 | 大一百二十胞体       |
+  | `grand_hecatonicosachoron`                 | 巨一百二十胞体       |
+  | `great_grand_hecatonicosachoron`           | 巨大一百二十胞体     |
+  | `small_stellated_hecatonicosachoron`       | 小星形一百二十胞体   |
+  | `great_stellated_hecatonicosachoron`       | 大星形一百二十胞体   |
+  | `grand_stellated_hecatonicosachoron`       | 巨星形一百二十胞体   |
+  | `great_grand_stellated_hecatonicosachoron` | 巨大星形一百二十胞体 |
+  | `faceted_hexacosichoron`                   | 刻面六百胞体         |
+  | `great_faceted_hexacosichoron`             | 大刻面六百胞体       |
+  | `grand_hexacosichoron`                     | 巨六百胞体           |
 
 - `RegularPolyhedronCompounds`（复合正多面体）：
   
-  | 图形名称                | 中文名                                     |
-  |-------------------------|--------------------------------------------|
-  | `stellated_octahedron`  | 星状正八面体（二复合正四面体）             |
-  | `chiricosahedron`       | 五复合正四面体                             |
-  | `icosicosahedron`       | 十复合正四面体                             |
-  | `rhombihedron`          | 五复合正六面体                             |
-  | `small_icosicosahedron` | 五复合正八面体                             |
-  
+  | 图形名称                | 中文名                                   |
+  |-------------------------|------------------------------------------|
+  | `stellated_octahedron`  | 星形八面体（二复合正四面体）             |
+  | `chiricosahedron`       | 五复合正四面体                           |
+  | `icosicosahedron`       | 十复合正四面体                           |
+  | `rhombihedron`          | 五复合正六面体                           |
+  | `small_icosicosahedron` | 五复合正八面体                           |
+
+- `TruncatedRegularPolyhedron`（截角正多面体）
+
+  | 图形名称                 | 中文名       |
+  |--------------------------|--------------|
+  | `truncated_tetrahedron`  | 截角四面体   |
+  | `truncated_hexahedron`   | 截角立方体   |
+  | `truncated_octahedron`   | 截角八面体   |
+  | `truncated_dodecahedron` | 截角十二面体 |
+  | `truncated_icosahedron`  | 截角二十面体 |
+
+- `RectifiedRegularPolyhedron`（截半正多面体）
+
+  | 图形名称                 | 中文名                             |
+  |--------------------------|------------------------------------|
+  | `rectified_tetrahedron`  | 截半四面体（等价于正八面体）       |
+  | `rectified_hexahedron`   | 截半立方体                         |
+  | `rectified_octahedron`   | 截半八面体（等价于截半立方体）     |
+  | `rectified_dodecahedron` | 截半十二面体                       |
+  | `rectified_icosahedron`  | 截半二十面体（等价于截半十二面体） |
+
+- `TruncatedRegularStarPolyhedron`（截角星形正多面体）
+
+  | 图形名称                                 | 中文名                                 |
+  |------------------------------------------|----------------------------------------|
+  | `truncated_great_dodecahedron`           | 截角大十二面体                         |
+  | `truncated_small_stellated_dodecahedron` | 截角小星形十二面体（等价于正十二面体） |
+  | `truncated_great_stellated_dodecahedron` | 截角大星形十二面体                     |
+  | `truncated_great_icosahedron`            | 截角二十面体                           |
+
+- `RectifiedRegularStarPolyhedron`（截半星形正多面体）
+
+  | 图形名称                                 | 中文名                                     |
+  |------------------------------------------|--------------------------------------------|
+  | `rectified_great_dodecahedron`           | 截半大十二面体                             |
+  | `rectified_small_stellated_dodecahedron` | 截半小星形十二面体（等价于截半大十二面体） |
+  | `rectified_great_stellated_dodecahedron` | 截半大星形十二面体（等价于大截半二十面体)  |
+  | `rectified_great_icosahedron`            | 截半二十面体（等价于截半大星形十二面体)    |
+
+- `RhombiRectifiedRegularPolyhedron`（小斜方截半正多面体）
+
+  | 图形名称                        | 中文名                                         |
+  |---------------------------------|------------------------------------------------|
+  | `rhombi_rectified_tetrahedron`  | 小斜方截半四面体（等价于截半立方体）           |
+  | `rhombi_rectified_hexahedron`   | 小斜方截半立方体                               |
+  | `rhombi_rectified_octahedron`   | 小斜方截半八面体（等价于小斜方截半立方体）     |
+  | `rhombi_rectified_dodecahedron` | 小斜方截半十二面体                             |
+  | `rhombi_rectified_icosahedron`  | 小斜方截半二十面体（等价于小斜方截半十二面体） |
+
+- `GreatRhombiRectifiedRegularPolyhedron`（大斜方截半正多面体）
+
+  | 图形名称                              | 中文名                                         |
+  |---------------------------------------|------------------------------------------------|
+  | `great_rhombi_rectified_tetrahedron`  | 大斜方截半四面体（等价于截角八面体）           |
+  | `great_rhombi_rectified_hexahedron`   | 大斜方截半立方体                               |
+  | `great_rhombi_rectified_octahedron`   | 大斜方截半八面体（等价于大斜方截半立方体）     |
+  | `great_rhombi_rectified_dodecahedron` | 大斜方截半十二面体                             |
+  | `great_rhombi_rectified_icosahedron`  | 大斜方截半二十面体（等价于大斜方截半十二面体） |

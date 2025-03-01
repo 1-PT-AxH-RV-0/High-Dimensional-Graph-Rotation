@@ -28,6 +28,34 @@ def validate_config(config):
         'RegularPolyhedronCompounds': [
             'stellated_octahedron', 'chiricosahedron', 'icosicosahedron',
             'rhombihedron', 'small_icosicosahedron'
+        ],
+        'TruncatedRegularPolyhedron': [
+            'truncated_tetrahedron', 'truncated_hexahedron',
+            'truncated_octahedron', 'truncated_dodecahedron',
+            'truncated_icosahedron'
+        ],
+        'RectifiedRegularPolyhedron': [
+            'rectified_tetrahedron', 'rectified_hexahedron',
+            'rectified_octahedron', 'rectified_dodecahedron',
+            'rectified_icosahedron'
+        ],
+        'TruncatedRegularStarPolyhedron': [
+            'truncated_great_dodecahedron', 'truncated_small_stellated_dodecahedron',
+            'truncated_great_stellated_dodecahedron', 'truncated_great_icosahedron'
+        ],
+        'RectifiedRegularStarPolyhedron': [
+            'rectified_great_dodecahedron', 'rectified_small_stellated_dodecahedron',
+            'rectified_great_stellated_dodecahedron', 'rectified_great_icosahedron'
+        ],
+        'RhombiRectifiedRegularPolyhedron': [
+            'rhombi_rectified_tetrahedron', 'rhombi_rectified_hexahedron',
+            'rhombi_rectified_octahedron', 'rhombi_rectified_dodecahedron',
+            'rhombi_rectified_icosahedron'
+        ],
+        'GreatRhombiRectifiedRegularPolyhedron': [
+            'great_rhombi_rectified_tetrahedron', 'great_rhombi_rectified_hexahedron',
+            'great_rhombi_rectified_octahedron', 'great_rhombi_rectified_dodecahedron',
+            'great_rhombi_rectified_icosahedron'
         ]
     }
 
@@ -57,11 +85,9 @@ def validate_config(config):
                 # 检查类型有效性
                 graph_type = graph.get('type')
                 valid_types = {
-                    'RegularPolyhedron', 'RegularPolychoron', 'RegularStarPolyhedron',
-                    'RegularStarPolychora', 'RegularPolyhedronCompounds',
                     'RegularPolygon', 'RegularStarPolygon',
                     'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
-                }
+                } | set(VALID_NAMES.keys())
                 if graph_type and graph_type not in valid_types:
                     errors.append(f"graphs[{idx}].type 无效值 '{graph_type}'。")
 

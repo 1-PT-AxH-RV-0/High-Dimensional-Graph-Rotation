@@ -691,6 +691,133 @@ class RegularPolyhedronCompounds:
         return vertices, generate_edges(vertices, 1)
 
 
+class TruncatedRegularPolyhedron:
+    @staticmethod
+    def truncated_tetrahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_tetrahedron.off'))
+    
+    @staticmethod
+    def truncated_hexahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_hexahedron.off'))
+    
+    @staticmethod
+    def truncated_octahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_octahedron.off'))
+    
+    @staticmethod
+    def truncated_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_dodecahedron.off'))
+    
+    @staticmethod
+    def truncated_icosahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_icosahedron.off'))
+
+
+class RectifiedRegularPolyhedron:
+    @staticmethod
+    def rectified_tetrahedron():
+        return RegularPolyhedron.octahedron()
+    
+    @staticmethod
+    def rectified_hexahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rectified_hexahedron.off'))
+    
+    @staticmethod
+    def rectified_octahedron():
+        return RectifiedRegularPolyhedron.rectified_hexahedron()
+    
+    @staticmethod
+    def rectified_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rectified_dodecahedron.off'))
+    
+    @staticmethod
+    def rectified_icosahedron():
+        return RectifiedRegularPolyhedron.rectified_dodecahedron()
+
+
+class TruncatedRegularStarPolyhedron:
+    @staticmethod
+    def truncated_great_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_great_dodecahedron.off'))
+    
+    @staticmethod
+    def truncated_small_stellated_dodecahedron():
+        return RegularPolyhedron.dodecahedron()
+    
+    @staticmethod
+    def truncated_great_stellated_dodecahedron():
+        vertices, edges = RegularPolyhedron.icosahedron()
+        edges.extend(find_regular_graphs(vertices, 5, 1))
+        
+        return vertices, edges
+
+    @staticmethod
+    def truncated_great_icosahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Truncated', 'Truncated_great_icosahedron.off'))
+
+
+class RectifiedRegularStarPolyhedron:
+    @staticmethod
+    def rectified_great_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rectified_great_dodecahedron.off'))
+    
+    @staticmethod
+    def rectified_small_stellated_dodecahedron():
+        return RectifiedRegularStarPolyhedron.rectified_great_dodecahedron()
+    
+    @staticmethod
+    def rectified_great_stellated_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rectified_great_stellated_dodecahedron.off'))
+
+    @staticmethod
+    def rectified_great_icosahedron():
+        return RectifiedRegularStarPolyhedron.rectified_great_stellated_dodecahedron()
+
+
+class RhombiRectifiedRegularPolyhedron:
+    @staticmethod
+    def rhombi_rectified_tetrahedron():
+        return RectifiedRegularPolyhedron.rectified_hexahedron()
+    
+    @staticmethod
+    def rhombi_rectified_hexahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rhombicuboctahedron.off'))
+    
+    @staticmethod
+    def rhombi_rectified_octahedron():
+        return RhombiRectifiedRegularPolyhedron.rhombi_rectified_hexahedron()
+    
+    @staticmethod
+    def rhombi_rectified_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Rhombicosidodecahedron.off'))
+    
+    @staticmethod
+    def rhombi_rectified_icosahedron():
+        return RhombiRectifiedRegularPolyhedron.rhombi_rectified_dodecahedron()
+
+
+class GreatRhombiRectifiedRegularPolyhedron:
+    @staticmethod
+    def great_rhombi_rectified_tetrahedron():
+        return TruncatedRegularPolyhedron.truncated_octahedron()
+    
+    @staticmethod
+    def great_rhombi_rectified_hexahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Great_rhombicuboctahedron.off'))
+    
+    @staticmethod
+    def great_rhombi_rectified_octahedron():
+        return GreatRhombiRectifiedRegularPolyhedron.great_rhombi_rectified_hexahedron()
+    
+    @staticmethod
+    def great_rhombi_rectified_dodecahedron():
+        return parse_off_file(os.path.join(CUR_FOLDER, 'Data', 'Rectified', 'Great_rhombicosidodecahedron.off'))
+    
+    @staticmethod
+    def great_rhombi_rectified_icosahedron():
+        return GreatRhombiRectifiedRegularPolyhedron.great_rhombi_rectified_dodecahedron()
+
+
 def get_duration(action):
     duration = action.get('duration')
     if duration is None:
@@ -738,7 +865,7 @@ def create_rotation_video(config):
         graph_id = graph_config['id']
         
         match graph_type:
-            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora' | 'RegularPolyhedronCompounds' | 'UniformPolyhedronCompounds':
+            case 'RegularPolyhedron' | 'RegularPolychoron' | 'RegularStarPolyhedron' | 'RegularStarPolychora' | 'RegularPolyhedronCompounds' | 'UniformPolyhedronCompounds' | 'TruncatedRegularPolyhedron' | 'RectifiedRegularPolyhedron' | 'TruncatedRegularStarPolyhedron' | 'RectifiedRegularStarPolyhedron' | 'RhombiRectifiedRegularPolyhedron' | 'GreatRhombiRectifiedRegularPolyhedron':
                 graph = getattr(globals()[graph_type], graph_config['name'])()
             case "RegularPolygon":
                 graph = generate_regular_polygon(graph_config['edge_count'])
