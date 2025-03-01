@@ -12,6 +12,8 @@ from validate_config import validate_config
 CUR_FOLDER = os.path.dirname(__file__)
 
 def sinspace_piece(start, stop, index, num=50, endpoint=True):
+    if index > num:
+        return 0
     if endpoint:
         angle = np.pi / num * index
         prev_angle = np.pi / num * (index - 1)
@@ -28,6 +30,8 @@ def sinspace_piece(start, stop, index, num=50, endpoint=True):
     return scaled_values - prev_scaled_values
 
 def linspace_piece(start, stop, _=None, num=50, endpoint=True):
+    if index > num:
+        return 0
     if endpoint:
         return (start - stop) / num
     return (start - stop) / (num - 1)
@@ -849,8 +853,6 @@ def create_rotation_video(config):
                             angle = r['angle']
                             duration = r['duration']
                             rotation_scale = ease_func(0, duration / total_duration, past, duration)
-                            if past > duration:
-                                rotation_scale = 0
                             
                             if priority not in target_transformation_data:
                                 target_transformation_data[priority] = {
