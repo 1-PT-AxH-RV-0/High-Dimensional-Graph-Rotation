@@ -86,7 +86,8 @@ def validate_config(config):
                 graph_type = graph.get('type')
                 valid_types = {
                     'RegularPolygon', 'RegularStarPolygon',
-                    'Simplex', 'Hypercube', 'Orthoplex', 'OffFile'
+                    'Simplex', 'Hypercube', 'Orthoplex', 'OffFile',
+                    'Text'
                 } | set(VALID_NAMES.keys())
                 if graph_type and graph_type not in valid_types:
                     errors.append(f"graphs[{idx}].type 无效值 '{graph_type}'。")
@@ -120,6 +121,13 @@ def validate_config(config):
                         continue
                     if not os.path.isfile(graph['path']):
                         errors.append(f"graphs[{idx}].path 所指向的路径不是一个文件。")
+                elif graph_type == 'Text':
+                    if 'text' not in graph:
+                        errors.append(f"graphs[{idx}] 需要字段 'text'（当 type 为 Text 时）。")
+                        continue
+                    if 'font_path' not in graph:
+                        errors.append(f"graphs[{idx}] 需要字段 'font_path'（当 type 为 Text 时）。")
+                        continue
 
                 # 检查字段类型
                 type_checks = [
@@ -140,10 +148,24 @@ def validate_config(config):
                     seen_ids.add(graph['id'])
 
                 # 检查未声明字段
-                allowed_fields = {'type', 'name', 'edge_count', 'gap', 'dimensions', 'path', 'id'}
+                allowed_fields = {'type', 'name', 'edge_count', 'gap', 'dimensions', 'path', 'font_path', 'text', 'elevations', 'id'}
                 for key in graph:
                     if key not in allowed_fields:
                         errors.append(f"graphs[{idx}] 包含未声明的字段 '{key}'。")
+                
+                # 检查升维字段
+                elevations = graph.get('elevations', [])
+                if not isinstance(elevations, list):
+                    errors.append(f"graphs[{idx}].elevations 必须是一个列表。")
+                else:
+                    for e_idx, elevation in enumerate(elevations):
+                        if not isinstance(elevation, dict):
+                            errors.append(f"graphs[{idx}].elevations[{idx}] 必须是一个字典。")
+                            continue
+                        required = ['type', 'height']
+                        for field in required:
+                            if field not in elevation:
+                                errors.append(f"graphs[{idx}].elevations[{idx}] 缺少字段 '{field}'。")
 
     # 检查video部分
     if 'video' in config:
