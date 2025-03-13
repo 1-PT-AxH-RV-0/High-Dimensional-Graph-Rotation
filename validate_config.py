@@ -166,6 +166,23 @@ def validate_config(config):
                         for field in required:
                             if field not in elevation:
                                 errors.append(f"graphs[{idx}].elevations[{idx}] 缺少字段 '{field}'。")
+                        
+                        type_checks = [
+                            ('type', str, '字符串'),
+                            ('height', (float, int), '数字'),
+                        ]
+                        for field, expected_type, expected_type_name in type_checks:
+                            if field in elevation and not isinstance(elevation[field], expected_type):
+                                errors.append(f"graphs[{idx}].elevations[{idx}].{field} 类型错误，应为{expected_type_name}。")
+                        
+                        vaild_elevation_types = {'cylindrify', 'conify'}
+                        if elevation['type'] not in vaild_elevation_types:
+                            errors.append(f"graphs[{idx}].elevations[{idx}].type 无效值，有效值为：{', '.join(vaild_elevation_types)}。")
+                        
+                        allowed_fields = {'type', 'height'}
+                        for key in elevation:
+                            if key not in allowed_fields:
+                                errors.append(f"graphs[{idx}].elevations[{idx}] 包含未声明的字段 '{key}'。")
 
     # 检查video部分
     if 'video' in config:
@@ -240,6 +257,8 @@ def validate_config(config):
                     if not (isinstance(item['offset'], list) and
                             all(isinstance(x, (int, float)) for x in item['offset'])):
                         errors.append(f"initial[{idx}].offset 应为数字列表。")
+                if 'move_priority' in item and not isinstance(item['move_priority'], (int, float)):
+                    errors.append(f"initial[{idx}].move_priority 应为数字类型。")
 
                 # 检查旋转动作
                 if 'rotations' in item:
@@ -264,6 +283,17 @@ def validate_config(config):
                                 errors.append(f"initial[{idx}].rotations[{r_idx}] 缺少必填字段 'angle'。")
                             elif not isinstance(rotation['angle'], (int, float)):
                                 errors.append(f"initial[{idx}].rotations[{r_idx}].angle 应为数字类型。")
+                            
+                            if 'center' in rotation and not (isinstance(rotation['center'], list) and all(isinstance(i, (float, int)) for i in rotation['center'])):
+                                errors.append(f"initial[{idx}].rotations[{r_idx}].center 应为数字列表。")
+                            
+                            if 'priority' in rotation and not isinstance(rotation['priority'], (int, float)):
+                                errors.append(f"initial[{idx}].rotations[{r_idx}].priority 应为数字类型。")
+                            
+                            allowed_fields = {'plane', 'angle', 'center', 'priority'}
+                            for key in rotation:
+                                if key not in allowed_fields:
+                                    errors.append(f"initial[{idx}].rotations[{r_idx}] 包含未声明的字段 '{key}'。")
 
                 # 检查未声明字段
                 allowed_fields = {'offset', 'rotations', 'move_priority', 'target'}

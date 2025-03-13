@@ -1,10 +1,12 @@
 [[graphs]]
-type = "RegularPolygon"
-edge_count = 3
+type = "Text"
+text = "P"
+font_path = "/storage/emulated/0/下载/ws.git/unicode快闪/Sarasa-Mono-SC-Regular.ttf"
 elevations = [
-  { type = 'conify', height = 2 },
-  { type = 'cylindrify', height = 2 }
+  { type = 'cylindrify', height = 0.1 }
 ]
+# type = "CantellatedRegularPolyhedron"
+# name = "cantellated_dodecahedron"
 id = "g1"
 
 [video]
@@ -12,11 +14,17 @@ width = 1080
 height = 1080
 
 [drawing]
-scale = 500
+scale = 250
 line_width = 1
 line_color = [230, 230, 230]
 background_color = [20, 20, 20]
 focal_length = 5
+
+[[initial]]
+rotations = [
+    { plane = [0, 2], angle = 45 }
+]
+target = "g1"
 
 [[actions]]
 type = "rotate"
@@ -24,12 +32,4 @@ plane = [0, 2]
 angle = 360
 duration = 180
 start = 0
-target = 'g1'
-
-[[actions]]
-type = "rotate"
-plane = [2, 3]
-angle = 360
-duration = 180
-start = 45
 target = 'g1'

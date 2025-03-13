@@ -11,7 +11,7 @@
 - `numpy`
 - `opencv-python`
 - `tqdm`
-- `gontTools`
+- `fontTools`
 - `toml`
 
 ## 用法
@@ -280,7 +280,7 @@ priority = 1
   | `hecatonicosachoron` | 正一百二十胞体 |
   | `hexacosichoron`     | 正六百胞体     |
 
-- `RegularStarPolyhedron`（星形正多面体）：
+- `RegularStarPolyhedron`（正星形多面体）：
   
   | 图形名称                        | 中文名         |
   |---------------------------------|----------------|
@@ -289,7 +289,7 @@ priority = 1
   | `great_stellated_dodecahedron`  | 大星形十二面体 |
   | `great_icosahedron`             | 大二十面体     |
 
-- `RegularStarPolychora`（星形正多胞体）：
+- `RegularStarPolychora`（正星形多胞体）：
   
   | 图形名称                                   | 中文名               |
   |--------------------------------------------|----------------------|
@@ -304,7 +304,7 @@ priority = 1
   | `great_faceted_hexacosichoron`             | 大刻面六百胞体       |
   | `grand_hexacosichoron`                     | 巨六百胞体           |
 
-- `RegularPolyhedronCompounds`（复合正多面体）：
+- `RegularPolyhedronCompounds`（正复合多面体）：
   
   | 图形名称                | 中文名                                   |
   |-------------------------|------------------------------------------|
@@ -334,7 +334,7 @@ priority = 1
   | `rectified_dodecahedron` | 截半十二面体                       |
   | `rectified_icosahedron`  | 截半二十面体（等价于截半十二面体） |
 
-- `TruncatedRegularStarPolyhedron`（截角星形正多面体）
+- `TruncatedRegularStarPolyhedron`（截角正星形多面体）
 
   | 图形名称                                 | 中文名                                 |
   |------------------------------------------|----------------------------------------|
@@ -343,7 +343,7 @@ priority = 1
   | `truncated_great_stellated_dodecahedron` | 截角大星形十二面体                     |
   | `truncated_great_icosahedron`            | 截角二十面体                           |
 
-- `RectifiedRegularStarPolyhedron`（截半星形正多面体）
+- `RectifiedRegularStarPolyhedron`（截半正星形多面体）
 
   | 图形名称                                 | 中文名                                     |
   |------------------------------------------|--------------------------------------------|
